@@ -1406,3 +1406,19 @@ class JMX(object):
         action.append(JMX.int_prop("ActionProcessor.target", target_index))
         action.append(JMX._string_prop("ActionProcessor.duration", str(duration_ms)))
         return action
+
+    @staticmethod
+    def _get_siebel_correletation(row_vars_template,row_id_ref_vars_template, regex):
+        proc = "com.blazemeter.jmeter.correlation.siebel.SiebelPagePostProcessor"
+        prefix = "SiebelPagePostProcessor"
+
+        element = etree.Element(proc, guiclass=proc+"Gui",
+                                testclass=proc, testname="bzm - Siebel Page Parser")
+
+        element.append(
+            JMX._string_prop("{}.rowVarsTemplate".format(prefix), row_vars_template if row_vars_template else ''))
+        element.append(
+            JMX._string_prop("{}.rowIdReferenceVarsTemplate".format(prefix), row_id_ref_vars_template if row_id_ref_vars_template else ''))
+        element.append(JMX._string_prop("{}.regex".format(prefix), regex if regex else ''))
+
+        return element

@@ -472,8 +472,8 @@ class JMeterScenarioBuilder(JMX):
             children.append(etree.Element("hashTree"))
 
         self.__add_extractors(children, request)
-
         self.__add_jsr_elements(children, request)
+        self.__add_siebel_elements(children, request)
 
         return [sampler, children]
 
@@ -692,7 +692,7 @@ class JMeterScenarioBuilder(JMX):
                                                     source.get("variable-names", ""))
             else:
                 config = JMX._get_csv_config(source_path, delimiter, source.get("loop", True),
-                                             source.get("variable-names", ""),  source.get("quoted", False))
+                                             source.get("variable-names", ""), source.get("quoted", False))
             elements.append(config)
             elements.append(etree.Element("hashTree"))
         return elements
@@ -710,3 +710,24 @@ class JMeterScenarioBuilder(JMX):
             elements.append(config)
             elements.append(etree.Element("hashTree"))
         return elements
+
+    @staticmethod
+    def __add_siebel_elements(children, req):
+        """
+        :type children: etree.Element
+        :type req: Request
+        """
+        jsrs = req.config.get("siebel-correlation", [])
+        if not isinstance(jsrs, list):
+            jsrs = [jsrs]
+        for idx, _ in enumerate(jsrs):
+            jsr = ensure_is_dict(jsrs, idx, sub_key='script-text')
+            template = jsr.get("template", None)
+            id_ref = jsr.get("id-ref", None)
+            regex = jsr.get("regex", None)
+
+            if not template:
+                raise TaurusConfigError("correlation element must specify the prefix")
+
+            children.append(JMX._get_siebel_correletation(template, id_ref, regex))
+            children.append(etree.Element("hashTree"))
